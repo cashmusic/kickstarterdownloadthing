@@ -3,19 +3,16 @@ class KickstarterDownloadThing {
 	public $email_address;
 	public $error_msg = null;
 	public $logged_in = false;
+	public $backers = array();
 	
 	public function __construct() {
-
+		$this->parseDataFolder();
 	}
 
 	public function verifyEmail($email_address) {
 		$email = trim(strtolower($email_address));
-		$query= "SELECT * FROM users WHERE LOWER(email)='$email'";
-		$result = mysql_query($query,$dblink);
-		// returns number of new (unapproved/unignored) questions if true
-		if (mysql_num_rows($result)) { 
-			$row = mysql_fetch_assoc($result);
-			return $row['fullname'];
+		if (array_key_exists($email, $this->backers)) {
+			return true;
 		} else {
 			return false;
 		}
@@ -49,13 +46,12 @@ class KickstarterDownloadThing {
 		}
 		
 		foreach ($output as $key => $user) {
-			//addToList($user['email'],$user['fullname']);
-			echo "$key. {$user['fullname']} / {$user['email']}<br />";
+			$this->addToList($user['email'],$user['fullname']);
 		}
 	}
 
-	public function parseFolder($folder) {
-		$updates = glob($folder . "/*.csv");
+	public function parseDataFolder() {
+		$updates = glob(DATA_LOCATION . "/*.csv");
 		if (is_array($updates) && count($updates)) {
 			foreach ($updates as $update) {
 				$this->parseAndAddExport($update);
@@ -63,12 +59,8 @@ class KickstarterDownloadThing {
 		}
 	}
 	
-	public function addToList($email1,$email2,$fullname) {
-		global $dblink;
-		$query = "INSERT INTO users (email,fullname) VALUES ('$email','$fullname')";
-		if (mysql_query($query,$dblink)) { 
-			return true;
-		}
+	public function addToList($email,$fullname) {
+		$this->backers[trim(strtolower($email))] = $fullname;
 	}
 }
 ?>

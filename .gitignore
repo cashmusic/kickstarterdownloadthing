@@ -1,5 +1,6 @@
 *.sw?
 *.bak
 sandbox/*
+data/*.csv
 
 .DS_Store
